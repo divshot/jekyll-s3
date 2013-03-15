@@ -10,11 +10,7 @@ module Jekyll
       def initialize(path, s3, config, site_dir)
         @path = path
         @full_path = "#{site_dir}/#{path}"
-        if File.exist?("#{site_dir}/#{path}")
-          @file = File.open("#{site_dir}/#{path}")
-        else
-          @file = create_empty_file("#{site_dir}/#{path}")
-        end
+        @file = File.exist?(@full_path) ? File.open(@full_path) : create_empty_file(@full_path)
         @s3 = s3
         @config = config
       end
