@@ -1,5 +1,6 @@
 require 'tempfile'
 require 'zlib'
+require 'fileutils'
 
 module Jekyll
   module S3
@@ -12,7 +13,7 @@ module Jekyll
         if File.exist?("#{site_dir}/#{path}")
           @file = File.open("#{site_dir}/#{path}")
         else
-          @file = File.open("#{site_dir}/#{path}", 'w') {}
+          @file = create_empty_file("#{site_dir}/#{path}")
         end
         @s3 = s3
         @config = config
@@ -88,6 +89,16 @@ module Jekyll
 
       def mime_type
         MIME::Types.type_for(path).first
+      end
+
+      def create_empty_file(path)
+        dir = File.dirname(path)
+
+        unless File.directory?(dir)
+          FileUtils.mkdir_p(dir)
+        end
+
+        File.open(path, 'w') {}
       end
     end
   end
