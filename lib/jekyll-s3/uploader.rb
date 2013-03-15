@@ -48,6 +48,12 @@ module Jekyll
             upload_file(f, s3, config, site_dir)
           end
         end
+
+        redirect_files(config, site_dir).each do |path|
+          config['s3_website_redirect_location'] = '/' + path[1]
+          upload_file(path[0], s3, config, site_dir)
+        end
+
         [new_files.length, changed_files.length, changed_files]
       end
 
@@ -61,6 +67,18 @@ module Jekyll
             puts "Upload #{upload.details}: FAILURE!"
           end
         end
+      end
+
+      def self.redirect_files(config, site_dir)
+        redirect_paths = []
+        config['s3_redirects'].each do |r|
+          redirect_path = r[0]
+          target_path = r[1]
+          if File.exist?("#{site_dir}/#{target_path}")
+            redirect_paths.push([redirect_path, target_path])
+          end
+        end
+        redirect_paths
       end
 
       def self.remove_superfluous_files(s3, s3_bucket_name, site_dir, in_headless_mode)

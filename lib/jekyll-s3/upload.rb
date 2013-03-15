@@ -9,7 +9,11 @@ module Jekyll
       def initialize(path, s3, config, site_dir)
         @path = path
         @full_path = "#{site_dir}/#{path}"
-        @file = File.open("#{site_dir}/#{path}")
+        if File.exist?("#{site_dir}/#{path}")
+          @file = File.open("#{site_dir}/#{path}")
+        else
+          @file = File.open("#{site_dir}/#{path}", 'w') {}
+        end
         @s3 = s3
         @config = config
       end
@@ -56,7 +60,8 @@ module Jekyll
       def upload_options
         opts = {
           :content_type => mime_type,
-          :reduced_redundancy => config['s3_reduced_redundancy']
+          :reduced_redundancy => config['s3_reduced_redundancy'],
+          :website_redirect_location => config['s3_website_redirect_location']
         }
 
         opts[:content_encoding] = "gzip" if gzip?
