@@ -10,7 +10,7 @@ module Jekyll
       def initialize(path, s3, config, site_dir)
         @path = path
         @full_path = "#{site_dir}/#{path}"
-        @file = File.exist?(@full_path) ? File.open(@full_path) : create_empty_file(@full_path)
+        @file = File.open(@full_path)
         @s3 = s3
         @config = config
       end
@@ -85,16 +85,6 @@ module Jekyll
 
       def mime_type
         MIME::Types.type_for(path).first
-      end
-
-      def create_empty_file(path)
-        dir = File.dirname(path)
-
-        unless File.directory?(dir)
-          FileUtils.mkdir_p(dir)
-        end
-
-        File.open(path, 'w') {}
       end
     end
   end

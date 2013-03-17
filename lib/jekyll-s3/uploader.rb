@@ -8,6 +8,8 @@ module Jekyll
                          :secret_access_key => config['s3_secret'],
                          :s3_endpoint => Endpoint.new(config['s3_endpoint']).hostname )
 
+        create_redirects(site_dir, config)
+
         new_files_count, changed_files_count, changed_files = upload_files(
           s3, config, site_dir
         )
@@ -45,14 +47,8 @@ module Jekyll
           pre_upload_report << "file(s)"
           puts pre_upload_report.join(' ')
           to_upload.each do |f|
+            config['s3_website_redirect_location'] = '/' + config['s3_redirects'][f] if config['s3_redirects'][f]
             upload_file(f, s3, config, site_dir)
-          end
-        end
-
-        config['s3_redirects'].each do |redirect|
-          if File.exist?("#{site_dir}/#{redirect[1]}")
-            config['s3_website_redirect_location'] = '/' + redirect[1]
-            upload_file(redirect[0], s3, config, site_dir)
           end
         end
 
@@ -101,6 +97,27 @@ module Jekyll
         Dir[site_dir + '/**/{*,.*}'].
           delete_if { |f| File.directory?(f) }.
           map { |f| f.gsub(site_dir + '/', '') }
+      end
+
+      def self.create_redirects(site_dir, config)
+        if config['s3_redirects']
+          config['s3_redirects'].each do |redirect|
+            if File.exist?("#{site_dir}/#{redirect[1]}")
+              target_path = File.extname(redirect[0]) ? redirect[0] : redirect[0] + '/index.html'
+              create_empty_file("#{site_dir}/#{target_path}")
+            end
+          end
+        end
+      end
+
+      def self.create_empty_file(path)
+        dir = File.dirname(path)
+
+        unless File.directory?(dir)
+          FileUtils.mkdir_p(dir)
+        end
+
+        File.open(path, 'w') {}
       end
     end
   end
