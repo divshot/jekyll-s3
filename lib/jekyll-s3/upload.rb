@@ -1,6 +1,5 @@
 require 'tempfile'
 require 'zlib'
-require 'fileutils'
 
 module Jekyll
   module S3
