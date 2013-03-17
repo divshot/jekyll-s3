@@ -102,10 +102,8 @@ module Jekyll
       def self.create_redirects(site_dir, config)
         if config['s3_redirects']
           config['s3_redirects'].each do |redirect|
-            if File.exist?("#{site_dir}/#{redirect[1]}")
-              target_path = File.extname(redirect[0]) ? redirect[0] : redirect[0] + '/index.html'
-              create_empty_file("#{site_dir}/#{target_path}")
-            end
+            target_path = File.extname(redirect[0]) ? redirect[0] : redirect[0] + '/index.html'
+            create_empty_file("#{site_dir}/#{target_path}")
           end
         end
       end
